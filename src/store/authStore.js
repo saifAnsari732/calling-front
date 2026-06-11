@@ -40,23 +40,21 @@ export const useAuthStore = create((set, get) => ({
           return;
         }
         
-        set({ token, user, isAuthenticated: true });
+        set({ token, user, isAuthenticated: true, isLoading: false });
 
-        // Verify token with backend to refresh user info
-        try {
-          const response = await axios.get(`${getBaseUrl()}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+        // Verify token with backend to refresh user info in background (don't await blocking UI)
+        axios.get(`${getBaseUrl()}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(async (response) => {
           const freshUser = response.data.user;
           await AsyncStorage.setItem('user', JSON.stringify(freshUser));
           set({ user: freshUser });
-        } catch (apiError) {
+        }).catch((apiError) => {
           console.log('Session validation failed. User may be offline or token expired.', apiError.message);
-          // If 401/403, log out. Otherwise, keep local cache for offline capabilities.
           if (apiError.response && (apiError.response.status === 401 || apiError.response.status === 403)) {
             get().logout();
           }
-        }
+        });
       } else {
         // No valid session
         set({ token: null, user: null, isAuthenticated: false });

@@ -1,12 +1,10 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { LayoutDashboard, Users, UserSquare2, FileSpreadsheet, Settings } from 'lucide-react-native';
-import { useThemeStore } from '../../store/themeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform, View } from 'react-native';
 
 export default function AdminLayout() {
-  const { theme } = useThemeStore();
-  const isDark = theme === 'dark';
   const insets = useSafeAreaInsets();
 
   return (
@@ -14,80 +12,67 @@ export default function AdminLayout() {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+          backgroundColor: '#FFFFFF',
           borderBottomWidth: 1,
-          borderBottomColor: isDark ? '#1E293B' : '#E2E8F0',
+          borderBottomColor: 'rgba(0,0,0,0.05)',
+          elevation: 0,
+          shadowOpacity: 0,
         },
         headerTitleStyle: {
-          color: isDark ? '#FFFFFF' : '#0F172A',
-          fontWeight: 'bold',
+          color: '#0F172A',
+          fontWeight: '800',
+          fontSize: 20,
         },
         tabBarStyle: {
-          position: 'absolute',
-          bottom: insets.bottom > 0 ? insets.bottom + 10 : 20,
-          left: 16,
-          right: 16,
-          backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-          borderRadius: 24,
-          height: 64,
-          borderTopWidth: 0,
-          paddingBottom: 0,
-          paddingTop: 0,
-          elevation: 10,
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0,0,0,0.05)',
+          elevation: 15,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.1,
+          shadowOffset: { width: 0, height: -5 },
+          shadowOpacity: 0.05,
           shadowRadius: 10,
+          height: Platform.OS === 'ios' ? 85 : 70,
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 10,
         },
-        tabBarItemStyle: {
-          paddingVertical: 10,
-        },
-        tabBarActiveTintColor: '#F59E0B',
-        tabBarInactiveTintColor: isDark ? '#64748B' : '#94A3B8',
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-        }
+        tabBarActiveTintColor: '#3B82F6',
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
         name="dashboard"
         options={{
           title: 'Dashboard',
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} />,
+          tabBarIcon: ({ color }) => <LayoutDashboard size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="telecallers"
+        name="users"
         options={{
-          title: 'Telecallers',
-          tabBarLabel: 'Team',
-          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
+          title: 'Users',
+          tabBarIcon: ({ color }) => <Users size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="leads"
         options={{
-          title: 'Meta & Manual Leads',
-          tabBarLabel: 'Leads',
-          tabBarIcon: ({ color, size }) => <UserSquare2 size={size} color={color} />,
+          title: 'Leads',
+          tabBarIcon: ({ color }) => <UserSquare2 size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
-          title: 'CRM Reports',
-          tabBarLabel: 'Reports',
-          tabBarIcon: ({ color, size }) => <FileSpreadsheet size={size} color={color} />,
+          title: 'Reports',
+          tabBarIcon: ({ color }) => <FileSpreadsheet size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarLabel: 'Settings',
-          tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
         }}
       />
     </Tabs>

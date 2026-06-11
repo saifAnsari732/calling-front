@@ -54,5 +54,10 @@
     "web": "expo start --web",
     "lint": "expo lint"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "metro-config": "^0.81.0",
+    "@expo/cli": "latest",
+    "lightningcss": "^1.32.0"
+  }
 }

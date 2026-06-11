@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity, TextInput, Linking, Alert } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
-import { useThemeStore } from '../../store/themeStore';
 import { PhoneCall, CalendarClock, History, Smartphone, Users, UserPlus, Calendar, PhoneForwarded, ThumbsUp, CheckCircle2, Briefcase, TrendingUp } from 'lucide-react-native';
 import OfflineBanner from '../../components/OfflineBanner';
 import CallModal from '../../components/CallModal';
 
 export default function TelecallerDashboard() {
-  const { theme } = useThemeStore();
-  const isDark = theme === 'dark';
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -31,7 +28,6 @@ export default function TelecallerDashboard() {
     }
   });
 
-  // Call Logger Mutation
   const logCallMutation = useMutation({
     mutationFn: (callDetails) => api.post('/calls', callDetails),
     onSuccess: () => {
@@ -50,20 +46,14 @@ export default function TelecallerDashboard() {
     setRefreshing(false);
   };
 
-  // Calling Trigger flow
   const triggerSimCall = (lead) => {
     if (!lead || !lead.mobile) return;
-    
-    // Track timestamps
     setCallStartTime(new Date().toISOString());
     setSelectedLeadForCall(lead);
 
     const telUrl = `tel:${lead.mobile}`;
     Linking.openURL(telUrl)
-      .then(() => {
-        // Show logger modal upon returning
-        setCallModalVisible(true);
-      })
+      .then(() => setCallModalVisible(true))
       .catch((err) => {
         console.log('Link error:', err);
         Alert.alert('Unavailable', 'SIM Calling is not supported or permission denied on this device.');
@@ -75,13 +65,7 @@ export default function TelecallerDashboard() {
       Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
       return;
     }
-
-    const dummyLead = {
-      id: 'QUICK',
-      name: quickName.trim() || 'Quick Call Lead',
-      mobile: quickPhone
-    };
-
+    const dummyLead = { id: 'QUICK', name: quickName.trim() || 'Quick Call Lead', mobile: quickPhone };
     triggerSimCall(dummyLead);
     setQuickPhone('');
     setQuickName('');
@@ -89,7 +73,7 @@ export default function TelecallerDashboard() {
 
   const handleCallModalSubmit = async (loggedDetails) => {
     const end_time = new Date().toISOString();
-    const duration = Math.round((new Date(end_time) - new Date(callStartTime)) / 1000); // in seconds
+    const duration = Math.round((new Date(end_time) - new Date(callStartTime)) / 1000); 
 
     const payload = {
       lead_id: loggedDetails.lead_id,
@@ -103,14 +87,11 @@ export default function TelecallerDashboard() {
       followupNotes: loggedDetails.followupNotes
     };
 
-    // If it was a quick call not in the CRM, we can mock/create a manual lead first or handle it
-    // For simplicity, if ID is 'QUICK', we can register it or assign dummy ID. Let's make the backend handle it.
-    // In our backend, the lead must exist. So we'll hit create lead first if it's QUICK!
     if (loggedDetails.lead_id === 'QUICK') {
       try {
         const leadRes = await api.post('/leads', {
           name: quickName.trim() || 'Quick Call Customer',
-          mobile: dummyLead.mobile,
+          mobile: quickPhone,
           lead_source: 'Manual Entry'
         });
         payload.lead_id = leadRes.data.leadId;
@@ -119,26 +100,25 @@ export default function TelecallerDashboard() {
         throw new Error('Quick caller registration failed.');
       }
     }
-
     await logCallMutation.mutateAsync(payload);
   };
 
   if (isLoading) {
     return (
-      <View className={`flex-1 justify-center items-center ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <ActivityIndicator size="large" color="#F59E0B" />
-        <Text className={`text-sm mt-3 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Loading Dashboard...</Text>
+      <View className="flex-1 justify-center items-center bg-slate-50">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="text-sm mt-3 text-slate-500 font-semibold tracking-wider uppercase">Loading Dashboard...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className={`flex-1 justify-center items-center px-6 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <Text className="text-red-500 text-sm font-semibold mb-2">Error Loading Dashboard</Text>
-        <Text className={`text-xs text-center mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{error.message}</Text>
-        <TouchableOpacity onPress={() => refetch()} className="bg-amber-500 px-6 py-3 rounded-xl">
-          <Text className="text-white text-xs font-bold">Retry</Text>
+      <View className="flex-1 justify-center items-center px-6 bg-slate-50">
+        <Text className="text-red-500 text-base font-bold mb-2">Error Loading Dashboard</Text>
+        <Text className="text-sm text-center mb-6 text-slate-500">{error.message}</Text>
+        <TouchableOpacity onPress={() => refetch()} className="bg-[#3B82F6] px-8 py-3 rounded-2xl shadow-lg shadow-[#3B82F6]/30">
+          <Text className="text-white text-sm font-bold">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -147,28 +127,31 @@ export default function TelecallerDashboard() {
   const { kpis, recentActivities, todaysFollowups } = data;
 
   const cardsList = [
-    { label: 'Assigned Leads', value: kpis.assignedLeads || 0, color: '#64748B', bgTint: 'bg-slate-100', darkBgTint: 'bg-slate-800/50', Icon: Users },
-    { label: 'Fresh/New Leads', value: kpis.freshLeads || 0, color: '#3B82F6', bgTint: 'bg-blue-100', darkBgTint: 'bg-blue-900/30', Icon: UserPlus },
-    { label: 'Follow Ups', value: kpis.followUps || 0, color: '#F59E0B', bgTint: 'bg-amber-100', darkBgTint: 'bg-amber-900/30', Icon: Calendar },
-    { label: 'Callback Leads', value: kpis.callbackLeads || 0, color: '#EAB308', bgTint: 'bg-yellow-100', darkBgTint: 'bg-yellow-900/30', Icon: PhoneForwarded },
-    { label: 'Interested', value: kpis.interested || 0, color: '#10B981', bgTint: 'bg-emerald-100', darkBgTint: 'bg-emerald-900/30', Icon: ThumbsUp },
-    { label: 'Closed/Won', value: kpis.closed || 0, color: '#14B8A6', bgTint: 'bg-teal-100', darkBgTint: 'bg-teal-900/30', Icon: CheckCircle2 },
-    { label: 'Distributor Int.', value: kpis.distributorInterested || 0, color: '#8B5CF6', bgTint: 'bg-purple-100', darkBgTint: 'bg-purple-900/30', Icon: Briefcase },
-    { label: 'Trader Int.', value: kpis.traderInterested || 0, color: '#6366F1', bgTint: 'bg-indigo-100', darkBgTint: 'bg-indigo-900/30', Icon: TrendingUp },
+    { label: 'Assigned Leads', value: kpis.assignedLeads || 0, color: '#3B82F6', bgTint: 'bg-blue-50', Icon: Users },
+    { label: 'Fresh/New', value: kpis.freshLeads || 0, color: '#8B5CF6', bgTint: 'bg-purple-50', Icon: UserPlus },
+    { label: 'Follow Ups', value: kpis.followUps || 0, color: '#F59E0B', bgTint: 'bg-amber-50', Icon: Calendar },
+    { label: 'Callbacks', value: kpis.callbackLeads || 0, color: '#EAB308', bgTint: 'bg-yellow-50', Icon: PhoneForwarded },
+    { label: 'Interested', value: kpis.interested || 0, color: '#10B981', bgTint: 'bg-emerald-50', Icon: ThumbsUp },
+    { label: 'Closed/Won', value: kpis.closed || 0, color: '#14B8A6', bgTint: 'bg-teal-50', Icon: CheckCircle2 },
+    { label: 'Distributor Int.', value: kpis.distributorInterested || 0, color: '#6366F1', bgTint: 'bg-indigo-50', Icon: Briefcase },
+    { label: 'Trader Int.', value: kpis.traderInterested || 0, color: '#EC4899', bgTint: 'bg-pink-50', Icon: TrendingUp },
   ];
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-slate-50">
       <OfflineBanner />
       <ScrollView
-        className={isDark ? 'bg-slate-950' : 'bg-slate-50'}
-        contentContainerStyle={{ paddingBottom: 100 }} // extra padding for floating navbar
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F59E0B']} />
-        }
+        contentContainerStyle={{ paddingBottom: 120 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" colors={['#3B82F6']} />}
       >
-        <View className="p-5 space-y-6">
+        <View className="p-5 space-y-6 pt-6">
           
+          {/* Header */}
+          <View className="mb-2">
+            <Text className="text-slate-900 text-3xl font-black tracking-tight">Overview</Text>
+            <Text className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Your Performance Matrix</Text>
+          </View>
+
           {/* KPI grid */}
           <View className="flex-row flex-wrap justify-between mt-1">
             {cardsList.map((card, idx) => {
@@ -176,20 +159,17 @@ export default function TelecallerDashboard() {
               return (
                 <View
                   key={idx}
-                  className={`w-[48%] p-4 mb-4 rounded-3xl shadow-sm ${
-                    isDark ? 'bg-slate-900' : 'bg-white'
-                  }`}
-                  style={{ elevation: 2, shadowColor: card.color, shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}
+                  className="w-[48%] p-5 mb-4 rounded-[28px] bg-white border border-slate-100 shadow-sm shadow-slate-200"
                 >
-                  <View className="flex-row justify-between items-start mb-2">
-                    <View className={`p-2.5 rounded-2xl ${isDark ? card.darkBgTint : card.bgTint}`}>
-                      <Icon size={18} color={card.color} />
+                  <View className="flex-row justify-between items-start mb-3">
+                    <View className={`p-3 rounded-2xl ${card.bgTint}`}>
+                      <Icon size={20} color={card.color} strokeWidth={2.5} />
                     </View>
                   </View>
-                  <Text className={`text-2xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                  <Text className="text-3xl font-black text-slate-800 tracking-tight">
                     {card.value}
                   </Text>
-                  <Text className={`text-[10px] uppercase font-bold tracking-wider mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <Text className="text-[10px] uppercase font-extrabold tracking-wider mt-1 text-slate-400">
                     {card.label}
                   </Text>
                 </View>
@@ -198,86 +178,81 @@ export default function TelecallerDashboard() {
           </View>
 
           {/* Quick Call Widget */}
-          <View className={`p-5 mb-2 rounded-3xl shadow-md ${isDark ? 'bg-slate-900' : 'bg-white'}`} style={{ shadowColor: '#F59E0B', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
-            <View className="flex-row items-center mb-5">
-              <View className="bg-amber-100 p-2 rounded-xl mr-3">
-                <Smartphone size={20} color="#F59E0B" />
+          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 relative overflow-hidden shadow-sm shadow-slate-200">
+            <View className="flex-row items-center mb-6">
+              <View className="bg-emerald-50 p-2.5 rounded-2xl mr-4 border border-emerald-100">
+                <Smartphone size={22} color="#10B981" />
               </View>
-              <Text className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              <Text className="text-xl font-black text-slate-800 tracking-wide">
                 Quick Dialer
               </Text>
             </View>
 
             <View className="space-y-4">
               <TextInput
-                className={`border rounded-2xl px-4 py-3.5 text-sm ${
-                  isDark ? 'border-slate-800 bg-slate-950 text-white' : 'border-slate-200 bg-slate-50 text-slate-800'
-                }`}
+                className="border border-slate-200 bg-slate-50 rounded-2xl px-5 py-4 text-sm text-slate-800 font-medium"
                 placeholder="Customer Name (Optional)"
-                placeholderTextColor={isDark ? '#475569' : '#94A3B8'}
+                placeholderTextColor="#94A3B8"
                 value={quickName}
                 onChangeText={setQuickName}
               />
-              <View className="flex-row justify-between items-center">
-                <TextInput
-                  className={`border rounded-2xl px-4 py-3.5 text-sm w-[68%] ${
-                    isDark ? 'border-slate-800 bg-slate-950 text-white' : 'border-slate-200 bg-slate-50 text-slate-800'
-                  }`}
-                  placeholder="10-digit Mobile Number"
-                  placeholderTextColor={isDark ? '#475569' : '#94A3B8'}
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={quickPhone}
-                  onChangeText={setQuickPhone}
-                />
-                <TouchableOpacity
-                  onPress={handleQuickCall}
-                  className="w-[28%] bg-amber-500 py-3.5 rounded-2xl flex-row justify-center items-center shadow-lg shadow-amber-500/30"
-                >
-                  <PhoneCall size={16} color="#FFFFFF" />
-                  <Text className="text-white text-sm font-bold ml-2">Call</Text>
-                </TouchableOpacity>
-              </View>
+              
+              <TextInput
+                className="border border-slate-200 bg-slate-50 rounded-2xl px-5 py-5 text-lg text-slate-800 font-black tracking-[0.3em] text-center"
+                placeholder="0000000000"
+                placeholderTextColor="#94A3B8"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={quickPhone}
+                onChangeText={setQuickPhone}
+              />
+
+              <TouchableOpacity
+                onPress={handleQuickCall}
+                className="w-full bg-[#10B981] py-5 rounded-2xl flex-row justify-center items-center shadow-lg shadow-emerald-500/30 mt-2"
+                activeOpacity={0.8}
+              >
+                <PhoneCall size={20} color="#FFFFFF" strokeWidth={2.5} />
+                <Text className="text-white text-base font-black ml-3 uppercase tracking-widest">Dial Now</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
           {/* Today's Follow Ups Widget */}
-          <View className={`p-5 mb-2 rounded-3xl shadow-md ${isDark ? 'bg-slate-900' : 'bg-white'}`} style={{ shadowColor: '#10B981', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
-            <View className="flex-row items-center mb-5">
-              <View className="bg-emerald-100 p-2 rounded-xl mr-3">
-                <CalendarClock size={20} color="#10B981" />
+          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 shadow-sm shadow-slate-200">
+            <View className="flex-row items-center mb-6">
+              <View className="bg-blue-50 p-2.5 rounded-2xl mr-4 border border-blue-100">
+                <CalendarClock size={22} color="#3B82F6" />
               </View>
-              <Text className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              <Text className="text-lg font-black text-slate-800 tracking-wide">
                 Today's Follow Ups
               </Text>
             </View>
 
             {todaysFollowups.length === 0 ? (
-              <Text className={`text-sm text-center py-5 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                Zero follow-ups scheduled for today. Good job!
+              <Text className="text-xs text-center py-6 font-bold uppercase tracking-wider text-slate-400">
+                Zero follow-ups scheduled for today
               </Text>
             ) : (
-              <View className="space-y-4">
+              <View className="space-y-3">
                 {todaysFollowups.map((item) => (
                   <View
                     key={item.id}
-                    className={`p-4 rounded-2xl flex-row justify-between items-center ${
-                      isDark ? 'bg-slate-950' : 'bg-slate-50'
-                    }`}
+                    className="p-4 rounded-2xl flex-row justify-between items-center bg-slate-50 border border-slate-100"
                   >
                     <View className="flex-1 mr-3">
-                      <Text className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                      <Text className="text-base font-bold text-slate-800 mb-1">
                         {item.lead_name}
                       </Text>
-                      <Text className={`text-xs mt-1 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                        Time: {item.time} • {item.lead_mobile}
+                      <Text className="text-xs font-semibold text-slate-500">
+                        {item.time} • {item.lead_mobile}
                       </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => triggerSimCall({ id: item.lead_id, name: item.lead_name, mobile: item.lead_mobile })}
-                      className="bg-emerald-500 p-3 rounded-xl shadow-sm shadow-emerald-500/30"
+                      className="bg-blue-100/50 border border-blue-200 p-3.5 rounded-xl"
                     >
-                      <PhoneCall size={18} color="#FFFFFF" />
+                      <PhoneCall size={20} color="#3B82F6" />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -286,46 +261,44 @@ export default function TelecallerDashboard() {
           </View>
 
           {/* Recent Activity Widget */}
-          <View className={`p-5 mb-2 rounded-3xl shadow-md ${isDark ? 'bg-slate-900' : 'bg-white'}`} style={{ shadowColor: '#3B82F6', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
-            <View className="flex-row items-center mb-5">
-              <View className="bg-blue-100 p-2 rounded-xl mr-3">
-                <History size={20} color="#3B82F6" />
+          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 shadow-sm shadow-slate-200">
+            <View className="flex-row items-center mb-6">
+              <View className="bg-purple-50 p-2.5 rounded-2xl mr-4 border border-purple-100">
+                <History size={22} color="#8B5CF6" />
               </View>
-              <Text className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                Recent Activity Logs
+              <Text className="text-lg font-black text-slate-800 tracking-wide">
+                Recent Activity
               </Text>
             </View>
 
             {recentActivities.length === 0 ? (
-              <Text className={`text-sm text-center py-5 font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                No calls logged yet. Start dialing!
+              <Text className="text-xs text-center py-6 font-bold uppercase tracking-wider text-slate-400">
+                No calls logged yet
               </Text>
             ) : (
-              <View className="space-y-4">
+              <View className="space-y-3">
                 {recentActivities.map((activity) => (
                   <View
                     key={activity.id}
-                    className={`p-4 rounded-2xl ${
-                      isDark ? 'bg-slate-950' : 'bg-slate-50'
-                    }`}
+                    className="p-4 rounded-2xl bg-slate-50 border border-slate-100"
                   >
-                    <View className="flex-row justify-between items-center mb-2">
-                      <Text className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                    <View className="flex-row justify-between items-center mb-3">
+                      <Text className="text-sm font-bold text-slate-800">
                         {activity.lead_name}
                       </Text>
-                      <Text className={`text-xs font-semibold text-slate-400`}>
+                      <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         {new Date(activity.created_at).toLocaleDateString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                       </Text>
                     </View>
-                    <View className="flex-row items-center mb-2">
-                      <View className="bg-amber-100 px-2 py-1 rounded-md mr-2">
-                        <Text className="text-xs text-amber-600 font-extrabold uppercase tracking-wider">
+                    <View className="flex-row items-center mb-2.5">
+                      <View className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg mr-3 shadow-sm">
+                        <Text className="text-[10px] text-slate-600 font-black uppercase tracking-widest">
                           {activity.status}
                         </Text>
                       </View>
-                      <Text className="text-xs text-slate-400 font-semibold">{activity.duration}s</Text>
+                      <Text className="text-xs text-[#8B5CF6] font-black">{activity.duration}s</Text>
                     </View>
-                    <Text className={`text-xs font-medium leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`} numberOfLines={2}>
+                    <Text className="text-xs font-medium leading-relaxed text-slate-500" numberOfLines={2}>
                       {activity.notes || 'No notes left.'}
                     </Text>
                   </View>
@@ -344,7 +317,7 @@ export default function TelecallerDashboard() {
           onClose={() => setCallModalVisible(false)}
           lead={selectedLeadForCall}
           onSubmit={handleCallModalSubmit}
-          isDark={isDark}
+          isDark={false}
         />
       )}
     </View>

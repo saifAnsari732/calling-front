@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
-import { useThemeStore } from '../../store/themeStore';
-import { Search, Filter, MapPin, Briefcase, CalendarClock, ChevronRight, PhoneCall } from 'lucide-react-native';
+import { Search, MapPin, Briefcase, CalendarClock, ChevronRight } from 'lucide-react-native';
 import OfflineBanner from '../../components/OfflineBanner';
 import { useRouter } from 'expo-router';
 
 export default function TelecallerLeads() {
-  const { theme } = useThemeStore();
-  const isDark = theme === 'dark';
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -18,7 +15,6 @@ export default function TelecallerLeads() {
   const [statusFilter, setStatusFilter] = useState('');
   const [businessTypeFilter, setBusinessTypeFilter] = useState('');
 
-  // Fetch only assigned leads for the logged-in telecaller (handled by backend filtering `assigned_to_id = req.user.id`)
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['telecallerLeadsList', searchQuery, statusFilter, businessTypeFilter],
     queryFn: async () => {
@@ -41,30 +37,36 @@ export default function TelecallerLeads() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Fresh Lead': return 'bg-blue-500/10 text-blue-500 border border-blue-500/20';
-      case 'Assigned': return 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20';
-      case 'Follow Up': return 'bg-amber-500/10 text-amber-500 border border-amber-500/20';
-      case 'Callback': return 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20';
-      case 'Interested': return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
-      case 'Distributor Interested': return 'bg-purple-500/10 text-purple-500 border border-purple-500/20';
-      case 'Trader Interested': return 'bg-violet-500/10 text-violet-500 border border-violet-500/20';
-      case 'Closed': return 'bg-teal-500/10 text-teal-600 border border-teal-500/20';
-      default: return 'bg-slate-500/10 text-slate-500 border border-slate-500/20';
+      case 'Fresh Lead': return 'bg-blue-50 text-blue-600 border border-blue-200';
+      case 'Assigned': return 'bg-indigo-50 text-indigo-600 border border-indigo-200';
+      case 'Follow Up': return 'bg-amber-50 text-amber-600 border border-amber-200';
+      case 'Callback': return 'bg-yellow-50 text-yellow-600 border border-yellow-200';
+      case 'Interested': return 'bg-emerald-50 text-emerald-600 border border-emerald-200';
+      case 'Distributor Interested': return 'bg-purple-50 text-purple-600 border border-purple-200';
+      case 'Trader Interested': return 'bg-pink-50 text-pink-600 border border-pink-200';
+      case 'Closed': return 'bg-teal-50 text-teal-600 border border-teal-200';
+      default: return 'bg-slate-100 text-slate-600 border border-slate-300';
     }
   };
 
   return (
-    <View className={`flex-1 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <View className="flex-1 bg-slate-50">
       <OfflineBanner />
 
       {/* Header Search Filter Box */}
-      <View className={`p-4 border-b ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-        <View className={`flex-row items-center border rounded-xl px-3 py-2.5 ${isDark ? 'border-slate-800 bg-slate-950' : 'border-slate-200 bg-slate-50'}`}>
-          <Search size={16} color="#64748B" />
+      <View className="p-5 border-b border-slate-200 bg-white shadow-sm shadow-slate-100">
+        
+        <View className="mb-4">
+          <Text className="text-slate-900 text-3xl font-black tracking-tight">Leads</Text>
+          <Text className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Manage & Engage</Text>
+        </View>
+
+        <View className="flex-row items-center border rounded-2xl px-4 py-3 border-slate-200 bg-slate-50">
+          <Search size={18} color="#64748B" />
           <TextInput
-            className={`flex-1 ml-2 text-xs py-0.5 ${isDark ? 'text-white' : 'text-slate-800'}`}
-            placeholder="Search my leads by Name, City, Product..."
-            placeholderTextColor="#475569"
+            className="flex-1 ml-3 text-sm py-1 text-slate-800 font-medium"
+            placeholder="Search by Name, City, Product..."
+            placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -74,7 +76,7 @@ export default function TelecallerLeads() {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="mt-3.5"
+          className="mt-4"
           data={[
             { label: 'All', value: '' },
             { label: 'Assigned', value: 'Assigned' },
@@ -91,13 +93,13 @@ export default function TelecallerLeads() {
             return (
               <TouchableOpacity
                 onPress={() => setStatusFilter(item.value)}
-                className={`px-3.5 py-1.5 rounded-lg border mr-2 ${
+                className={`px-4 py-2 rounded-xl border mr-3 ${
                   isSelected 
-                    ? 'bg-amber-500 border-transparent' 
-                    : isDark ? 'border-slate-800 bg-slate-950' : 'border-slate-300 bg-slate-50'
+                    ? 'bg-[#3B82F6] border-transparent shadow-md shadow-blue-500/30' 
+                    : 'border-slate-200 bg-slate-50'
                 }`}
               >
-                <Text className={`text-[10px] font-bold ${isSelected ? 'text-white' : isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                <Text className={`text-xs font-bold tracking-wide ${isSelected ? 'text-white' : 'text-slate-500'}`}>
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -108,72 +110,76 @@ export default function TelecallerLeads() {
 
       {/* Leads List */}
       {isLoading ? (
-        <ActivityIndicator size="large" color="#F59E0B" className="py-20" />
+        <ActivityIndicator size="large" color="#3B82F6" className="py-20" />
       ) : error ? (
         <View className="flex-1 justify-center items-center p-6">
-          <Text className="text-red-500 text-sm font-semibold mb-2">Error loading leads</Text>
+          <Text className="text-red-500 text-base font-bold mb-2">Error loading leads</Text>
           <Text className="text-xs text-slate-500 mb-6">{error.message}</Text>
-          <TouchableOpacity onPress={() => refetch()} className="bg-amber-500 px-6 py-3 rounded-xl">
-            <Text className="text-white text-xs font-bold">Retry</Text>
+          <TouchableOpacity onPress={() => refetch()} className="bg-[#3B82F6] px-8 py-3 rounded-2xl shadow-md shadow-blue-500/30">
+            <Text className="text-white text-sm font-bold">Retry</Text>
           </TouchableOpacity>
         </View>
       ) : data?.leads?.length === 0 ? (
         <View className="flex-1 justify-center items-center p-6">
-          <Text className={`text-sm text-center ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            No assigned leads found matching criteria.
+          <Text className="text-sm text-center text-slate-500 font-bold uppercase tracking-widest">
+            No leads found matching criteria.
           </Text>
         </View>
       ) : (
         <FlatList
           data={data.leads}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 12 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#F59E0B']} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3B82F6" colors={['#3B82F6']} />
           }
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push(`/lead/${item.id}`)}
-              className={`mb-3.5 p-4 rounded-3xl border shadow-sm flex-row items-center justify-between ${
-                isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'
-              }`}
+              className="mb-4 p-5 rounded-[28px] border border-slate-100 bg-white shadow-sm shadow-slate-200 flex-row items-center justify-between"
               activeOpacity={0.8}
             >
-              <View className="flex-1 mr-2">
+              <View className="flex-1 mr-3">
                 {/* Header row */}
-                <View className="flex-row justify-between items-center mb-1.5">
-                  <Text className={`text-sm font-bold flex-1 mr-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="text-lg font-black flex-1 mr-3 text-slate-800 tracking-wide">
                     {item.name}
                   </Text>
-                  <Text className={`text-[9px] px-2 py-0.5 font-bold uppercase rounded-full ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </Text>
+                  <View className={`px-2.5 py-1 rounded-xl ${getStatusColor(item.status)}`}>
+                    <Text className="text-[10px] font-black uppercase tracking-widest">
+                      {item.status}
+                    </Text>
+                  </View>
                 </View>
 
                 {/* Sub details */}
-                <Text className={`text-xxs font-semibold uppercase tracking-wider mb-2.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Mobile: {item.mobile} • Source: {item.lead_source}
+                <Text className="text-xs font-bold uppercase tracking-widest mb-3 text-slate-500">
+                  {item.mobile} • {item.lead_source}
                 </Text>
 
                 {/* Info grids */}
-                <View className="flex-row flex-wrap border-t border-slate-500/5 pt-2.5 space-y-1">
+                <View className="flex-row flex-wrap border-t border-slate-100 pt-3 space-y-1.5">
                   <View className="flex-row items-center w-[48%] mb-1">
-                    <MapPin size={11} color="#64748B" />
-                    <Text className="text-[10px] text-slate-500 ml-1.5" numberOfLines={1}>
+                    <MapPin size={12} color="#94A3B8" />
+                    <Text className="text-[11px] text-slate-500 font-medium ml-2" numberOfLines={1}>
                       {item.city || 'N/A'}, {item.state || 'N/A'}
                     </Text>
                   </View>
                   <View className="flex-row items-center w-[48%] mb-1">
-                    <Briefcase size={11} color="#64748B" />
-                    <Text className="text-[10px] text-slate-500 ml-1.5" numberOfLines={1}>
+                    <Briefcase size={12} color="#94A3B8" />
+                    <Text className="text-[11px] text-slate-500 font-medium ml-2" numberOfLines={1}>
                       {item.business_type || 'N/A'}
                     </Text>
                   </View>
                   
                   {item.product_interest && (
-                    <View className="flex-row items-center w-full mt-1">
-                      <CalendarClock size={11} color="#64748B" />
-                      <Text className="text-[10px] text-slate-500 ml-1.5" numberOfLines={1}>
+                    <View className="flex-row items-center w-full mt-1.5">
+                      <CalendarClock size={12} color="#94A3B8" />
+                      <Text className="text-[11px] text-slate-500 font-medium ml-2" numberOfLines={1}>
                         Interest: {item.product_interest}
                       </Text>
                     </View>
@@ -181,7 +187,9 @@ export default function TelecallerLeads() {
                 </View>
               </View>
 
-              <ChevronRight size={16} color={isDark ? '#475569' : '#CBD5E1'} />
+              <View className="bg-slate-50 p-2 rounded-full border border-slate-200">
+                <ChevronRight size={20} color="#64748B" />
+              </View>
             </TouchableOpacity>
           )}
         />
