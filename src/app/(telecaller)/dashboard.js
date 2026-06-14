@@ -3,6 +3,7 @@ import { View, Text, ScrollView, RefreshControl, ActivityIndicator, TouchableOpa
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
 import { PhoneCall, CalendarClock, History, Smartphone, Users, UserPlus, Calendar, PhoneForwarded, ThumbsUp, CheckCircle2, Briefcase, TrendingUp } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import OfflineBanner from '../../components/OfflineBanner';
 import CallModal from '../../components/CallModal';
 
@@ -139,6 +140,12 @@ export default function TelecallerDashboard() {
 
   return (
     <View className="flex-1 bg-slate-50">
+      <LinearGradient
+        colors={['#EEF2FF', '#F8FAFC']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 250 }}
+      />
       <OfflineBanner />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 120 }}
@@ -159,17 +166,17 @@ export default function TelecallerDashboard() {
               return (
                 <View
                   key={idx}
-                  className="w-[48%] p-5 mb-4 rounded-[28px] bg-white border border-slate-100 shadow-sm shadow-slate-200"
+                  className="w-[48%] p-5 mb-4 rounded-[28px] bg-white border border-slate-100 shadow-sm shadow-indigo-100/30"
                 >
                   <View className="flex-row justify-between items-start mb-3">
                     <View className={`p-3 rounded-2xl ${card.bgTint}`}>
                       <Icon size={20} color={card.color} strokeWidth={2.5} />
                     </View>
                   </View>
-                  <Text className="text-3xl font-black text-slate-800 tracking-tight">
+                  <Text className="text-3xl font-black text-slate-900 tracking-tight">
                     {card.value}
                   </Text>
-                  <Text className="text-[10px] uppercase font-extrabold tracking-wider mt-1 text-slate-400">
+                  <Text className="text-[11px] uppercase font-bold tracking-widest mt-1 text-slate-500">
                     {card.label}
                   </Text>
                 </View>
@@ -178,19 +185,19 @@ export default function TelecallerDashboard() {
           </View>
 
           {/* Quick Call Widget */}
-          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 relative overflow-hidden shadow-sm shadow-slate-200">
+          <View className="p-6 mb-2 rounded-[32px] bg-white border border-emerald-50 relative overflow-hidden shadow-lg shadow-emerald-100/40">
             <View className="flex-row items-center mb-6">
-              <View className="bg-emerald-50 p-2.5 rounded-2xl mr-4 border border-emerald-100">
-                <Smartphone size={22} color="#10B981" />
+              <View className="bg-emerald-100/50 p-2.5 rounded-2xl mr-4">
+                <Smartphone size={22} color="#10B981" strokeWidth={2.5} />
               </View>
-              <Text className="text-xl font-black text-slate-800 tracking-wide">
+              <Text className="text-[20px] font-black text-slate-800 tracking-wide">
                 Quick Dialer
               </Text>
             </View>
 
             <View className="space-y-4">
               <TextInput
-                className="border border-slate-200 bg-slate-50 rounded-2xl px-5 py-4 text-sm text-slate-800 font-medium"
+                className="border-[1.5px] border-emerald-100/50 bg-emerald-50/30 rounded-2xl px-5 py-4 text-sm text-slate-800 font-bold"
                 placeholder="Customer Name (Optional)"
                 placeholderTextColor="#94A3B8"
                 value={quickName}
@@ -198,7 +205,7 @@ export default function TelecallerDashboard() {
               />
               
               <TextInput
-                className="border border-slate-200 bg-slate-50 rounded-2xl px-5 py-5 text-lg text-slate-800 font-black tracking-[0.3em] text-center"
+                className="border-[1.5px] border-emerald-100/50 bg-emerald-50/30 rounded-2xl px-5 py-5 text-lg text-slate-800 font-black tracking-[0.3em] text-center"
                 placeholder="0000000000"
                 placeholderTextColor="#94A3B8"
                 keyboardType="phone-pad"
@@ -209,22 +216,29 @@ export default function TelecallerDashboard() {
 
               <TouchableOpacity
                 onPress={handleQuickCall}
-                className="w-full bg-[#10B981] py-5 rounded-2xl flex-row justify-center items-center shadow-lg shadow-emerald-500/30 mt-2"
-                activeOpacity={0.8}
+                className="w-full rounded-2xl shadow-xl shadow-emerald-500/40 mt-2 overflow-hidden"
+                activeOpacity={0.9}
               >
-                <PhoneCall size={20} color="#FFFFFF" strokeWidth={2.5} />
-                <Text className="text-white text-base font-black ml-3 uppercase tracking-widest">Dial Now</Text>
+                <LinearGradient
+                  colors={['#10B981', '#059669']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ paddingVertical: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <PhoneCall size={20} color="#FFFFFF" strokeWidth={2.5} />
+                  <Text className="text-white text-[15px] font-black ml-3 uppercase tracking-widest">Dial Now</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Today's Follow Ups Widget */}
-          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 shadow-sm shadow-slate-200">
+          <View className="p-6 mb-2 rounded-[32px] bg-white border border-slate-100 shadow-sm shadow-indigo-100/30">
             <View className="flex-row items-center mb-6">
-              <View className="bg-blue-50 p-2.5 rounded-2xl mr-4 border border-blue-100">
-                <CalendarClock size={22} color="#3B82F6" />
+              <View className="bg-blue-100/50 p-2.5 rounded-2xl mr-4">
+                <CalendarClock size={22} color="#3B82F6" strokeWidth={2.5} />
               </View>
-              <Text className="text-lg font-black text-slate-800 tracking-wide">
+              <Text className="text-[20px] font-black text-slate-800 tracking-wide">
                 Today's Follow Ups
               </Text>
             </View>
@@ -238,21 +252,21 @@ export default function TelecallerDashboard() {
                 {todaysFollowups.map((item) => (
                   <View
                     key={item.id}
-                    className="p-4 rounded-2xl flex-row justify-between items-center bg-slate-50 border border-slate-100"
+                    className="p-4 rounded-[20px] flex-row justify-between items-center bg-slate-50 border border-slate-100/60"
                   >
                     <View className="flex-1 mr-3">
-                      <Text className="text-base font-bold text-slate-800 mb-1">
+                      <Text className="text-[15px] font-black text-slate-800 mb-1 tracking-wide">
                         {item.lead_name}
                       </Text>
-                      <Text className="text-xs font-semibold text-slate-500">
+                      <Text className="text-[11px] font-bold text-slate-400 tracking-wider">
                         {item.time} • {item.lead_mobile}
                       </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => triggerSimCall({ id: item.lead_id, name: item.lead_name, mobile: item.lead_mobile })}
-                      className="bg-blue-100/50 border border-blue-200 p-3.5 rounded-xl"
+                      className="bg-[#3B82F6] shadow-md shadow-blue-500/30 p-3.5 rounded-2xl"
                     >
-                      <PhoneCall size={20} color="#3B82F6" />
+                      <PhoneCall size={20} color="#FFFFFF" strokeWidth={2.5} />
                     </TouchableOpacity>
                   </View>
                 ))}

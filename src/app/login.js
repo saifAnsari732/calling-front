@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Dimensions } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { Phone, Lock, Eye, EyeOff, CheckSquare, Square } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
   const { login } = useAuthStore();
@@ -39,36 +42,53 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-slate-50">
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-slate-50">
+      {/* Decorative Top Gradient Background */}
+      <LinearGradient
+        colors={['#EEF2FF', '#FFFFFF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 400 }}
+      />
+      
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 justify-center px-6 py-12">
           
           {/* Header Branding */}
-          <View className="items-center mb-12">
-            <View className="w-24 h-24 bg-white rounded-[32px] justify-center items-center mb-6 shadow-xl shadow-slate-200 border border-slate-100">
-              <Text className="text-[#3B82F6] text-6xl font-black">O</Text>
+          <View className="items-center mb-10">
+            <View className="w-24 h-24 bg-white rounded-3xl justify-center items-center mb-6 shadow-xl shadow-indigo-200/50 border border-white">
+              <LinearGradient
+                colors={['#4F46E5', '#2563EB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ width: '100%', height: '100%', borderRadius: 24, justifyContent: 'center', alignItems: 'center' }}
+              >
+                <Text className="text-white text-6xl font-black">O</Text>
+              </LinearGradient>
             </View>
-            <Text className="text-4xl font-extrabold text-slate-800 tracking-tight">OilFlow CRM</Text>
-            <Text className="text-[#3B82F6] text-xs mt-2 uppercase tracking-[0.2em] font-bold">
-              Premium Lead Management
-            </Text>
+            <Text className="text-[34px] font-black text-slate-900 tracking-tight">OilFlow CRM</Text>
+            <View className="bg-indigo-50 px-4 py-1.5 rounded-full mt-3 border border-indigo-100">
+              <Text className="text-indigo-600 text-[11px] uppercase tracking-[0.2em] font-extrabold">
+                Premium Lead Management
+              </Text>
+            </View>
           </View>
 
           {/* Form Container */}
-          <View className="p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl shadow-slate-200/50">
-            <Text className="text-2xl font-black mb-8 text-slate-800">
-              Welcome Back
+          <View className="p-8 rounded-[36px] bg-white border border-slate-100/60 shadow-2xl shadow-indigo-100/40">
+            <Text className="text-[22px] font-black mb-8 text-slate-800 tracking-tight">
+              Sign in to account
             </Text>
 
             {errorMsg && (
-              <View className="bg-red-50 border border-red-100 p-4 rounded-2xl mb-6">
-                <Text className="text-red-500 text-sm font-bold text-center">{errorMsg}</Text>
+              <View className="bg-red-50/80 border border-red-100 p-4 rounded-2xl mb-6 flex-row items-center">
+                <Text className="text-red-600 text-sm font-bold flex-1">{errorMsg}</Text>
               </View>
             )}
 
             {/* Mobile Number Field */}
-            <View className="mb-5">
-              <Text className="text-[10px] font-bold uppercase tracking-wider mb-2 text-slate-500">
+            <View className="mb-6">
+              <Text className="text-[11px] font-extrabold uppercase tracking-widest mb-2.5 text-slate-400">
                 Mobile Number
               </Text>
               <Controller
@@ -78,10 +98,12 @@ export default function LoginScreen() {
                   pattern: { value: /^[0-9]{10}$/, message: 'Must be a 10-digit number' }
                 }}
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className={`flex-row items-center border rounded-2xl px-4 py-4 bg-slate-50 ${errors.mobile ? 'border-red-300' : 'border-slate-200'}`}>
-                    <Phone size={18} color="#3B82F6" />
+                  <View className={`flex-row items-center border-[1.5px] rounded-[20px] px-4 py-4 bg-slate-50/50 ${errors.mobile ? 'border-red-300 bg-red-50/30' : 'border-slate-200'}`}>
+                    <View className="bg-indigo-100/50 p-2 rounded-xl">
+                      <Phone size={18} color="#4F46E5" strokeWidth={2.5} />
+                    </View>
                     <TextInput
-                      className="flex-1 ml-3 text-base text-slate-800 font-medium"
+                      className="flex-1 ml-3 text-[15px] text-slate-800 font-bold tracking-wider"
                       placeholder="Enter 10-digit number"
                       placeholderTextColor="#94A3B8"
                       keyboardType="phone-pad"
@@ -98,17 +120,19 @@ export default function LoginScreen() {
 
             {/* Password Field */}
             <View className="mb-6">
-              <Text className="text-[10px] font-bold uppercase tracking-wider mb-2 text-slate-500">
+              <Text className="text-[11px] font-extrabold uppercase tracking-widest mb-2.5 text-slate-400">
                 Password
               </Text>
               <Controller
                 control={control}
                 rules={{ required: 'Password is required' }}
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className={`flex-row items-center border rounded-2xl px-4 py-4 bg-slate-50 ${errors.password ? 'border-red-300' : 'border-slate-200'}`}>
-                    <Lock size={18} color="#3B82F6" />
+                  <View className={`flex-row items-center border-[1.5px] rounded-[20px] px-4 py-4 bg-slate-50/50 ${errors.password ? 'border-red-300 bg-red-50/30' : 'border-slate-200'}`}>
+                    <View className="bg-indigo-100/50 p-2 rounded-xl">
+                      <Lock size={18} color="#4F46E5" strokeWidth={2.5} />
+                    </View>
                     <TextInput
-                      className="flex-1 ml-3 text-base text-slate-800 font-medium"
+                      className="flex-1 ml-3 text-[15px] text-slate-800 font-bold tracking-wider"
                       placeholder="Enter password"
                       placeholderTextColor="#94A3B8"
                       secureTextEntry={!showPassword}
@@ -116,8 +140,8 @@ export default function LoginScreen() {
                       onChangeText={onChange}
                       value={value}
                     />
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className="p-1">
-                      {showPassword ? <EyeOff size={18} color="#64748B" /> : <Eye size={18} color="#64748B" />}
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className="p-2">
+                      {showPassword ? <EyeOff size={20} color="#94A3B8" /> : <Eye size={20} color="#94A3B8" />}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -132,14 +156,14 @@ export default function LoginScreen() {
               onPress={() => setRememberMe(!rememberMe)}
             >
               {rememberMe ? (
-                <View className="bg-[#3B82F6]/10 rounded-md p-0.5">
-                  <CheckSquare size={20} color="#3B82F6" />
+                <View className="bg-indigo-500 rounded-lg p-0.5 shadow-sm shadow-indigo-300">
+                  <CheckSquare size={18} color="#FFFFFF" />
                 </View>
               ) : (
-                <Square size={20} color="#94A3B8" />
+                <Square size={20} color="#CBD5E1" />
               )}
-              <Text className="text-sm font-semibold ml-3 text-slate-600">
-                Remember my login
+              <Text className="text-[13px] font-bold ml-3 text-slate-500">
+                Keep me logged in
               </Text>
             </TouchableOpacity>
 
@@ -147,16 +171,23 @@ export default function LoginScreen() {
             <TouchableOpacity
               onPress={handleSubmit(onSubmit)}
               disabled={isSubmitting}
-              className="bg-[#3B82F6] py-5 rounded-2xl flex-row justify-center items-center shadow-xl shadow-[#3B82F6]/30"
+              className="rounded-[20px] shadow-lg shadow-indigo-500/40 overflow-hidden"
               activeOpacity={0.9}
             >
-              {isSubmitting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text className="text-white text-base font-black tracking-widest uppercase">
-                  Sign In
-                </Text>
-              )}
+              <LinearGradient
+                colors={['#4F46E5', '#3B82F6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ paddingVertical: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text className="text-white text-[15px] font-black tracking-widest uppercase">
+                    Access Dashboard
+                  </Text>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
           </View>
           

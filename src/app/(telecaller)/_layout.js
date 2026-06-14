@@ -10,32 +10,21 @@ export default function TelecallerLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 1,
-          borderBottomColor: 'rgba(0,0,0,0.05)',
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerTitleStyle: {
-          color: '#0F172A',
-          fontWeight: '800',
-          fontSize: 20,
-        },
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
-          borderTopColor: 'rgba(0,0,0,0.05)',
-          elevation: 15,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -5 },
-          shadowOpacity: 0.05,
-          shadowRadius: 10,
-          height: Platform.OS === 'ios' ? 85 : 90,
+          borderTopColor: 'rgba(0,0,0,0.03)',
+          elevation: 20,
+          shadowColor: '#4F46E5',
+          shadowOffset: { width: 0, height: -10 },
+          shadowOpacity: 0.08,
+          shadowRadius: 20,
+          height: Platform.OS === 'ios' ? 85 : 80,
           paddingBottom: Platform.OS === 'ios' ? insets.bottom : 10,
+          paddingTop: 10,
         },
-        tabBarActiveTintColor: '#3B82F6',
+        tabBarActiveTintColor: '#4F46E5',
         tabBarInactiveTintColor: '#94A3B8',
         tabBarShowLabel: false,
       }}
