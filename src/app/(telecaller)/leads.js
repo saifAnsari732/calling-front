@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl, Linking, Alert } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
-import { Search, MapPin, Briefcase, CalendarClock, ChevronRight } from 'lucide-react-native';
+import { Search, MapPin, Briefcase, CalendarClock, ChevronRight, Phone } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import OfflineBanner from '../../components/OfflineBanner';
 import { useRouter } from 'expo-router';
@@ -144,12 +144,14 @@ export default function TelecallerLeads() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4F46E5" colors={['#4F46E5']} />
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => router.push(`/lead/${item.id}`)}
+            <View
               className="mb-4 p-5 rounded-[28px] border-[1.5px] border-slate-100/80 bg-white shadow-md shadow-indigo-100/40 flex-row items-center justify-between"
-              activeOpacity={0.8}
             >
-              <View className="flex-1 mr-3">
+              <TouchableOpacity
+                onPress={() => router.push(`/lead/${item.id}`)}
+                className="flex-1 mr-3"
+                activeOpacity={0.7}
+              >
                 {/* Header row */}
                 <View className="flex-row justify-between items-start mb-2.5">
                   <Text className="text-[18px] font-black flex-1 mr-3 text-slate-900 tracking-tight leading-tight">
@@ -191,12 +193,32 @@ export default function TelecallerLeads() {
                     </View>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
 
-              <View className="bg-indigo-50 p-2.5 rounded-[14px]">
-                <ChevronRight size={20} color="#4F46E5" strokeWidth={3} />
+              <View className="flex-row items-center">
+                <TouchableOpacity
+                  onPress={() => {
+                    const telUrl = `tel:${item.mobile}`;
+                    Linking.openURL(telUrl).catch((err) => {
+                      console.log('Call error:', err);
+                      Alert.alert('Unavailable', 'Calling is not supported or permission denied on this device.');
+                    });
+                  }}
+                  className="bg-emerald-50 p-2.5 rounded-[14px] mr-2"
+                  activeOpacity={0.7}
+                >
+                  <Phone size={20} color="#10B981" strokeWidth={3} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => router.push(`/lead/${item.id}`)}
+                  className="bg-indigo-50 p-2.5 rounded-[14px]"
+                  activeOpacity={0.7}
+                >
+                  <ChevronRight size={20} color="#4F46E5" strokeWidth={3} />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           )}
         />
       )}
