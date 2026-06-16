@@ -15,6 +15,7 @@ export default function TelecallerLeads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [businessTypeFilter, setBusinessTypeFilter] = useState('');
+  const [callGroup, setCallGroup] = useState('uncalled'); // 'uncalled' or 'called'
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['telecallerLeadsList', searchQuery, statusFilter, businessTypeFilter],
@@ -46,9 +47,22 @@ export default function TelecallerLeads() {
       case 'Distributor Interested': return 'bg-purple-50/80 text-purple-600 border border-purple-200/50';
       case 'Trader Interested': return 'bg-pink-50/80 text-pink-600 border border-pink-200/50';
       case 'Closed': return 'bg-teal-50/80 text-teal-600 border border-teal-200/50';
+      case 'Not Connected': return 'bg-slate-100 text-slate-600 border border-slate-300';
       default: return 'bg-slate-50/80 text-slate-500 border border-slate-200/50';
     }
   };
+
+  const displayLeads = data?.leads?.filter(lead => {
+    const isCalled = ['Follow Up', 'Callback', 'Interested', 'Distributor Interested', 'Trader Interested', 'Not Connected', 'Closed', 'Rejected'].includes(lead.status);
+    if (callGroup === 'uncalled') {
+      return !isCalled;
+    } else {
+      if (statusFilter) {
+        return lead.status === statusFilter;
+      }
+      return isCalled;
+    }
+  }) || [];
 
   return (
     <View className="flex-1 bg-slate-50">
@@ -78,40 +92,76 @@ export default function TelecallerLeads() {
           />
         </View>
 
-        {/* Filter Badges */}
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mt-5"
-          data={[
-            { label: 'All', value: '' },
-            { label: 'Assigned', value: 'Assigned' },
-            { label: 'Follow Up', value: 'Follow Up' },
-            { label: 'Callback', value: 'Callback' },
-            { label: 'Interested', value: 'Interested' },
-            { label: 'Distributor Int.', value: 'Distributor Interested' },
-            { label: 'Trader Int.', value: 'Trader Interested' },
-            { label: 'Closed', value: 'Closed' }
-          ]}
-          keyExtractor={(item) => item.label}
-          renderItem={({ item }) => {
-            const isSelected = statusFilter === item.value;
-            return (
-              <TouchableOpacity
-                onPress={() => setStatusFilter(item.value)}
-                className={`px-5 py-2.5 rounded-[16px] border-[1.5px] mr-3 ${
-                  isSelected 
-                    ? 'bg-indigo-600 border-indigo-600 shadow-md shadow-indigo-500/30' 
-                    : 'border-slate-200 bg-white shadow-sm shadow-slate-100'
-                }`}
-              >
-                <Text className={`text-[13px] font-black tracking-wide ${isSelected ? 'text-white' : 'text-slate-500'}`}>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
+        {/* Called / Uncalled Group Toggle */}
+        <View className="flex-row bg-slate-100 p-1.5 rounded-[20px] mt-5">
+          <TouchableOpacity
+            onPress={() => {
+              setCallGroup('uncalled');
+              setStatusFilter(''); // Clear status filter when switching groups
+            }}
+            className={`flex-1 py-3.5 rounded-[16px] items-center ${
+              callGroup === 'uncalled' ? 'bg-white shadow-sm' : ''
+            }`}
+          >
+            <Text className={`text-[14px] font-black tracking-wide ${
+              callGroup === 'uncalled' ? 'text-indigo-600' : 'text-slate-500'
+            }`}>
+              Pending Calls (Uncalled)
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setCallGroup('called');
+              setStatusFilter(''); // Clear status filter when switching groups
+            }}
+            className={`flex-1 py-3.5 rounded-[16px] items-center ${
+              callGroup === 'called' ? 'bg-white shadow-sm' : ''
+            }`}
+          >
+            <Text className={`text-[14px] font-black tracking-wide ${
+              callGroup === 'called' ? 'text-indigo-600' : 'text-slate-500'
+            }`}>
+              Call History (Called)
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Filter Badges for Called Group */}
+        {callGroup === 'called' && (
+          <View>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="mt-4"
+              data={[
+                { label: 'All Called', value: '' },
+                { label: 'Interested', value: 'Interested' },
+                { label: 'Not Connected', value: 'Not Connected' },
+                { label: 'Follow Up', value: 'Follow Up' },
+                { label: 'Callback', value: 'Callback' },
+                { label: 'Closed', value: 'Closed' }
+              ]}
+              keyExtractor={(item) => item.label}
+              renderItem={({ item }) => {
+                const isSelected = statusFilter === item.value;
+                return (
+                  <TouchableOpacity
+                    onPress={() => setStatusFilter(item.value)}
+                    className={`px-5 py-2.5 rounded-[16px] border-[1.5px] mr-3 ${
+                      isSelected 
+                        ? 'bg-indigo-600 border-indigo-600 shadow-md shadow-indigo-500/30' 
+                        : 'border-slate-200 bg-white shadow-sm shadow-slate-100'
+                    }`}
+                  >
+                    <Text className={`text-[13px] font-black tracking-wide ${isSelected ? 'text-white' : 'text-slate-500'}`}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        )}
       </View>
 
       {/* Leads List */}
@@ -125,7 +175,7 @@ export default function TelecallerLeads() {
             <Text className="text-white text-sm font-bold">Retry</Text>
           </TouchableOpacity>
         </View>
-      ) : data?.leads?.length === 0 ? (
+      ) : displayLeads.length === 0 ? (
         <View className="flex-1 justify-center items-center p-6">
           <Text className="text-[13px] text-center text-slate-400 font-black uppercase tracking-widest">
             No leads found
@@ -133,8 +183,8 @@ export default function TelecallerLeads() {
         </View>
       ) : (
         <FlatList
-          data={data.leads}
-          keyExtractor={(item) => item.id}
+          data={displayLeads}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
           initialNumToRender={10}
           maxToRenderPerBatch={10}

@@ -128,15 +128,12 @@ export default function TelecallerDashboard() {
   const { kpis, recentActivities, todaysFollowups } = data;
 
   const cardsList = [
-    { label: 'Assigned Leads', value: kpis.assignedLeads || 0, color: '#3B82F6', bgTint: 'bg-blue-50', Icon: Users },
-    { label: 'Fresh/New', value: kpis.freshLeads || 0, color: '#8B5CF6', bgTint: 'bg-purple-50', Icon: UserPlus },
-    { label: 'Follow Ups', value: kpis.followUps || 0, color: '#F59E0B', bgTint: 'bg-amber-50', Icon: Calendar },
-    { label: 'Callbacks', value: kpis.callbackLeads || 0, color: '#EAB308', bgTint: 'bg-yellow-50', Icon: PhoneForwarded },
-    { label: 'Interested', value: kpis.interested || 0, color: '#10B981', bgTint: 'bg-emerald-50', Icon: ThumbsUp },
-    { label: 'Closed/Won', value: kpis.closed || 0, color: '#14B8A6', bgTint: 'bg-teal-50', Icon: CheckCircle2 },
-    { label: 'Distributor Int.', value: kpis.distributorInterested || 0, color: '#6366F1', bgTint: 'bg-indigo-50', Icon: Briefcase },
-    { label: 'Trader Int.', value: kpis.traderInterested || 0, color: '#EC4899', bgTint: 'bg-pink-50', Icon: TrendingUp },
+    { label: 'Uncalled Leads', value: kpis.freshLeads || 0, color: '#3B82F6', bgTint: 'bg-blue-50', Icon: UserPlus },
+    { label: 'Today\'s Followups', value: kpis.followUps || 0, color: '#F59E0B', bgTint: 'bg-amber-50', Icon: Calendar },
+    { label: 'Not Connected', value: kpis.notConnected || 0, color: '#64748B', bgTint: 'bg-slate-100', Icon: PhoneForwarded },
+    { label: 'Interested Leads', value: (kpis.interested || 0) + (kpis.distributorInterested || 0) + (kpis.traderInterested || 0), color: '#10B981', bgTint: 'bg-emerald-50', Icon: ThumbsUp },
   ];
+
 
   return (
     <View className="flex-1 bg-slate-50">
